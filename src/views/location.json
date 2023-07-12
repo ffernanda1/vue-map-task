@@ -1,0 +1,17 @@
+[
+    {
+        "name": "Lokasi A",
+        "latitude": -7.7864,
+        "longitude": 110.3658
+    },
+    {
+        "name": "Lokasi B",
+        "latitude": -7.8015,
+        "longitude": 110.3672
+    },
+    {
+        "name": "Lokasi C",
+        "latitude": -7.7937,
+        "longitude": 110.3708
+    }
+]
