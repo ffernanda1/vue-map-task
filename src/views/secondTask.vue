@@ -14,7 +14,7 @@ import { Style, Icon } from 'ol/style';
 import VectorSource from 'ol/source/Vector';
 import VectorLayer from 'ol/layer/Vector';
 
-import locations from './location.json'; // Mengimpor data JSON
+import locations from './location.json'; 
 
 export default {
   mounted() {

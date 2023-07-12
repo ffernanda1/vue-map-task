@@ -15,6 +15,9 @@ import HelloWorld from './components/HelloWorld.vue'
         <RouterLink to="/secondTask">Second Done</RouterLink>
         <RouterLink to="/firstTask">First Done</RouterLink>
         <RouterLink to="/thirdTask">Third Done</RouterLink>
+        <RouterLink to="/fourthTask">Fourth Done</RouterLink>
+        <RouterLink to="/fifthTask">Fifth Done</RouterLink>
+
       </nav>
     </div>
   </header>

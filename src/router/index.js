@@ -26,6 +26,16 @@ const router = createRouter({
       path: '/thirdTask',
       name: 'thirdTask',
       component: () => import('../views/thirdTask.vue')
+    },
+    {
+      path: '/fourthTask',
+      name: 'fourthTask',
+      component: () => import('../views/fourthTask.vue')
+    },
+    {
+      path: '/fifthTask',
+      name: 'fifthTask',
+      component: () => import('../views/fifthTask.vue')
     }
   ]
 })
