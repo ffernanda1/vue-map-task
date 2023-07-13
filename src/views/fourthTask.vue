@@ -1,9 +1,8 @@
 <template>
   <div>
-    <div ref="map" class="map"></div>
-    <div class="coordinates">
-      <h3>Marker Coordinates:</h3>
-      <p>{{ markerCoordinates }}</p>
+    <div id="map" class="map"></div>
+    <div id="marker" class="marker" draggable="true">
+      Drag me!!!
     </div>
   </div>
 </template>
@@ -11,105 +10,87 @@
 <script>
 import 'ol/ol.css';
 import { Map, View } from 'ol';
-import { fromLonLat, toLonLat } from 'ol/proj';
-import  DragAndDrop  from 'ol/interaction/DragAndDrop.js';
-import { Tile as TileLayer, Vector as VectorLayer } from 'ol/layer';
-import { OSM, Vector as VectorSource } from 'ol/source';
-import { Icon, Style } from 'ol/style';
-import Point from 'ol/geom/Point';
+import TileLayer from 'ol/layer/Tile';
+import OSM from 'ol/source/OSM';
+import Overlay from 'ol/Overlay';
 import Feature from 'ol/Feature';
-import GeoJSON from 'ol/format/GeoJSON.js';
-import GPX from 'ol/format/GPX.js';
-import TopoJSON from 'ol/format/TopoJSON.js';
-import IGC from 'ol/format/IGC.js';
-import KML from 'ol/format/KML.js';
+import Point from 'ol/geom/Point';
+import { fromLonLat } from 'ol/proj';
+import {  Modify } from 'ol/interaction';
+import { Vector as VectorLayer } from 'ol/layer';
+import { Vector as VectorSource } from 'ol/source';
 
 export default {
-  data() {
-    return {
-      map: null,
-      marker: null,
-      markerCoordinates: '',
-    };
-  },
   mounted() {
-    this.initializeMap();
-  },
-  methods: {
-    initializeMap() {
-      const centerCoordinates = fromLonLat([ 110.3695,-7.7956]);
-
-      this.map = new Map({
-        target: this.$refs.map,
-        layers: [
-          new TileLayer({
-            source: new OSM(),
-          }),
-        ],
-        view: new View({
-          center: centerCoordinates,
-          zoom: 10,
+    const map = new Map({
+      target: 'map',
+      layers: [
+        new TileLayer({
+          source: new OSM(),
         }),
-      });
+      ],
+      view: new View({
+        center: fromLonLat([110.3658,-7.7864]),
+        zoom: 10,
+      }),
+    });
 
-      this.addMarker(centerCoordinates);
-      this.addDragAndDropInteraction();
+    const source = new VectorSource();
+    const vectorLayer = new VectorLayer({
+      source: source,
+    });
+    map.addLayer(vectorLayer);
 
-      console.log(this.addDragAndDropInteraction());
-    },
-    addMarker(coordinates) {
-      const iconStyle = new Style({
-        image: new Icon({
-          anchor: [0.5, 1],
-          src: 'https://openlayers.org/en/latest/examples/data/icon.png',
-        }),
-      });
+    const dragInteraction = new Modify({
+      source: source,
+    });
+    map.addInteraction(dragInteraction);
 
-      const markerSource = new VectorSource({
-        features: [
-          new Feature({
-            geometry: new Point(coordinates),
-          }),
-        ],
-      });
+    const marker = new Feature({
+      geometry: new Point(fromLonLat([0, 0])),
+    });
+    source.addFeature(marker);
 
-      const markerLayer = new VectorLayer({
-        source: markerSource,
-        style: iconStyle,
-      });
+    const overlay = new Overlay({
+      element: document.getElementById('marker'),
+      positioning: 'bottom-center',
+      stopEvent: false,
+    });
+    map.addOverlay(overlay);
 
-      this.map.addLayer(markerLayer);
-      this.marker = markerSource.getFeatures()[0];
-    },
-    addDragAndDropInteraction() {
-      const dragAndDropInteraction = new DragAndDrop({
-        formatConstructors: [GPX, GeoJSON, IGC, KML, TopoJSON],
-      });
+    map.on('click', (event) => {
+      const coordinate = event.coordinate;
+      marker.getGeometry().setCoordinates(coordinate);
+      overlay.setPosition(coordinate);
+    });
 
-      dragAndDropInteraction.on('addfeatures', (event) => {
-        const coordinate = event.features[0].getGeometry().getCoordinates();
-        const lonLatCoordinate = toLonLat(coordinate);
-        this.updateMarkerCoordinates(lonLatCoordinate);
-      });
+   map.on('pointermove', (event) => {
+       if (dragInteraction && dragInteraction.source) {
+        const features = dragInteraction.getFeatures().getArray();
 
-      this.map.addInteraction(dragAndDropInteraction);
-    },
-    updateMarkerCoordinates(coordinates) {
-      const lon = coordinates[0].toFixed(4);
-      const lat = coordinates[1].toFixed(4);
-      this.markerCoordinates = `${lat}, ${lon}`;
-    },
+        if (map.hasFeatureAtPixel(event.pixel) || features.length > 0) {
+          map.getViewport().style.cursor = 'pointer';
+        } else {
+          map.getViewport().style.cursor = 'default';
+        }
+      }
+    });
+
   },
 };
 </script>
 
-<style scoped>
+<style>
 .map {
   width: 100%;
   height: 400px;
 }
 
-.coordinates {
-  margin-top: 20px;
+.marker {
+  position: absolute;
+  background-color: rgba(255, 6, 6, 0.8);
+  padding: 10px 20px;
+  border: 2px solid #ccc;
+  border-radius: 4px;
 }
 </style>
